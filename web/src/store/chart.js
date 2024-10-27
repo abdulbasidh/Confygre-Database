@@ -167,6 +167,72 @@ export const useChartStore = defineStore("chart", {
       this.refs.$patch({
         [refId]: newRef
       });
+    },
+
+    zoomToFit() {
+      // Get the bounding box of all tables and refs
+      const bbox = this.calculateBoundingBox();
+  
+      // Get viewport dimensions (you can replace these with your actual dimensions)
+      const viewportWidth = 800; // example width
+      const viewportHeight = 600; // example height
+  
+      // Calculate scale factors
+      const scaleX = viewportWidth / bbox.width;
+      const scaleY = viewportHeight / bbox.height;
+      const scale = Math.min(scaleX, scaleY);
+  
+      // Update the zoom state
+      this.updateZoom(scale);
+  
+      // Optional: Center the view (if you have pan implemented)
+      this.updatePan({
+        x: (viewportWidth - bbox.x * scale) / 2,
+        y: (viewportHeight - bbox.y * scale) / 2
+      });
+    },
+  
+    calculateBoundingBox() {
+      const tables = Object.values(this.tables);
+      const refs = Object.values(this.refs);
+  
+      const allElements = [...tables, ...refs];
+  
+      if (allElements.length === 0) {
+        return { x: 0, y: 0, width: 0, height: 0 };
+      }
+  
+      const xCoords = allElements
+      .map(el => el.x)
+      .filter(x => x !== undefined); // Filter out undefined values
+  
+    const yCoords = allElements
+      .map(el => el.y)
+      .filter(y => y !== undefined); // Filter out undefined values
+  
+    const widths = allElements
+      .map(el => el.width)
+      .filter(width => width !== undefined); // Filter out undefined values
+  
+    const heights = allElements
+      .map(el => el.height)
+      .filter(height => height !== undefined); // Filter out undefined values
+
+      console.log(xCoords, yCoords, widths, heights);
+  
+      const minX = Math.min(...xCoords);
+      const minY = Math.min(...yCoords);
+      const maxX = Math.max(...xCoords.map((x, index) => x + widths[index]));
+      const maxY = Math.max(...yCoords.map((y, index) => y + heights[index]));
+      
+      console.log(minX, minY, maxX-minX, maxY-minY);
+
+      return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+      };
     }
   }
 });

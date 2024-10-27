@@ -99,7 +99,7 @@
   }
 
   const applyScaleToFit = () => {
-    // do nothing
+    chart.zoomToFit();
   }
 
 
